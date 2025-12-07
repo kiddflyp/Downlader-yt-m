@@ -3,124 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertidor YouTube a MP3</title>
+    <title>Descargador MP3 Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1c1c1c 0%, #2a2a2a 100%);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: white;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0;
         }
+
         .card {
-            background: #333;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             text-align: center;
             width: 90%;
             max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        h2 { margin-bottom: 20px; font-weight: 300; }
-        .logo { color: #ff0000; font-size: 3rem; margin-bottom: 10px; }
+
+        h2 { margin-bottom: 20px; font-weight: 600; letter-spacing: 1px; }
+        .logo { color: #ff0050; font-size: 3.5rem; margin-bottom: 15px; display: block; }
         
-        .input-group { position: relative; margin-bottom: 15px; }
-        input[type="text"] {
+        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
+        label { font-size: 0.9rem; color: #ccc; margin-bottom: 5px; display: block; }
+
+        input[type="text"], select {
             width: 100%;
             padding: 15px 15px 15px 45px;
-            border: 2px solid #555;
-            background: #444;
+            border: 2px solid transparent;
+            background: rgba(0, 0, 0, 0.3);
             color: white;
             border-radius: 10px;
             font-size: 16px;
             outline: none;
             transition: 0.3s;
         }
-        input[type="text"]:focus { border-color: #ff0000; }
-        .input-icon { position: absolute; left: 15px; top: 18px; color: #aaa; }
-
-        /* Estilo para el selector de calidad */
-        select {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 25px;
-            background: #444;
-            color: white;
-            border: 2px solid #555;
-            border-radius: 10px;
-            font-size: 16px;
-            outline: none;
-            cursor: pointer;
+        
+        input[type="text"]:focus, select:focus {
+            border-color: #ff0050;
+            background: rgba(0, 0, 0, 0.5);
         }
-        select:focus { border-color: #ff0000; }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 42px; /* Ajustado por el label */
+            color: #aaa;
+        }
+
+        /* Ajuste icono para el select */
+        .select-icon { top: 42px; }
 
         button {
-            background: linear-gradient(45deg, #ff0000, #ff4d4d);
+            background: linear-gradient(45deg, #ff0050, #ff4b2b);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
+            padding: 16px 30px;
+            border-radius: 30px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.2s;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(255, 0, 80, 0.4);
         }
+        
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 0, 80, 0.6); }
         button:active { transform: scale(0.98); }
-        button:disabled { background: #555; cursor: not-allowed; }
+        button:disabled { background: #555; cursor: not-allowed; box-shadow: none; transform: none; }
 
+        /* Barra de Progreso */
         .progress-container {
             margin-top: 25px;
-            background-color: #222;
-            border-radius: 10px;
-            height: 25px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            height: 20px;
             width: 100%;
             display: none;
             overflow: hidden;
-            position: relative;
         }
         .progress-bar {
-            background: #00e676;
+            background: #00f260; /* Verde neón */
+            background: linear-gradient(to right, #00f260, #0575e6);
             height: 100%;
             width: 0%;
-            border-radius: 10px;
-            transition: width 0.4s ease;
+            border-radius: 15px;
+            transition: width 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            color: black;
+            font-size: 10px;
+            color: white;
             font-weight: bold;
         }
-        .status-text { margin-top: 10px; font-size: 14px; color: #ccc; min-height: 20px;}
+        .status-text { margin-top: 15px; font-size: 14px; color: #ddd; min-height: 20px; font-style: italic;}
     </style>
 </head>
 <body>
 
     <div class="card">
         <i class="fab fa-youtube logo"></i>
-        <h2>MP3 Downloader</h2>
+        <h2>YouTube Converter</h2>
         
         <div class="input-group">
+            <label>Enlace del video</label>
             <i class="fas fa-link input-icon"></i>
-            <input type="text" id="urlInput" placeholder="Pega el link de YouTube aquí..." autocomplete="off">
+            <input type="text" id="urlInput" placeholder="Pega el link aquí..." autocomplete="off">
         </div>
 
-        <select id="qualitySelect">
-            <option value="128">Calidad Normal (128 kbps)</option>
-            <option value="192" selected>Calidad Alta (192 kbps)</option>
-            <option value="320">Calidad Máxima (320 kbps)</option>
-        </select>
+        <div class="input-group">
+            <label>Calidad de Audio</label>
+            <i class="fas fa-music input-icon select-icon"></i>
+            <select id="qualitySelect">
+                <option value="128">Normal (128 kbps) - Rápido</option>
+                <option value="192" selected>Alta (192 kbps) - Recomendado</option>
+                <option value="320">Máxima (320 kbps) - Lento</option>
+            </select>
+        </div>
         
-        <button id="btnDownload" onclick="iniciarDescarga()">CONVERTIR Y DESCARGAR</button>
+        <button id="btnDownload" onclick="iniciarDescarga()">
+            <i class="fas fa-cloud-download-alt"></i> DESCARGAR MP3
+        </button>
 
         <div class="progress-container" id="progressContainer">
-            <div class="progress-bar" id="progressBar">0%</div>
+            <div class="progress-bar" id="progressBar"></div>
         </div>
         <p class="status-text" id="statusText"></p>
     </div>
@@ -128,7 +144,6 @@
     <script>
         async function iniciarDescarga() {
             const url = document.getElementById('urlInput').value;
-            // Obtenemos la calidad seleccionada
             const quality = document.getElementById('qualitySelect').value;
             
             const btn = document.getElementById('btnDownload');
@@ -137,36 +152,41 @@
             const statusText = document.getElementById('statusText');
 
             if (!url) {
-                alert("Por favor ingresa una URL");
+                statusText.style.color = '#ff4b2b';
+                statusText.innerText = "⚠️ Por favor ingresa una URL válida";
                 return;
             }
 
+            // Resetear interfaz
+            statusText.style.color = '#ddd';
             btn.disabled = true;
-            btn.innerText = "Procesando...";
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
             pContainer.style.display = 'block';
-            pBar.style.width = '0%';
-            pBar.innerText = '0%';
-            statusText.innerText = "Conectando con el servidor...";
-
-            let width = 0;
+            pBar.style.width = '5%';
+            
+            // Simulación de progreso (hasta 90%)
+            let width = 5;
             const timer = setInterval(() => {
-                if (width >= 85) {
+                if (width >= 90) {
                     clearInterval(timer);
                 } else {
-                    width++; 
+                    width += Math.random() * 2; // Incremento aleatorio para realismo
+                    if (width > 90) width = 90;
                     pBar.style.width = width + '%';
-                    pBar.innerText = width + '%';
-                    if(width > 20) statusText.innerText = `Descargando en ${quality} kbps...`;
-                    if(width > 60) statusText.innerText = "Convirtiendo formato...";
+                    
+                    if(width > 10 && width < 40) statusText.innerText = "Conectando con YouTube...";
+                    if(width > 40 && width < 70) statusText.innerText = "Extrayendo audio...";
+                    if(width > 70) statusText.innerText = "Convirtiendo formato...";
                 }
-            }, 100);
+            }, 300);
 
             try {
+                // Preparar datos para enviar a Python
                 const formData = new FormData();
                 formData.append('url', url);
-                // Enviamos también la calidad
                 formData.append('quality', quality);
 
+                // Petición al servidor
                 const response = await fetch('/download', {
                     method: 'POST',
                     body: formData
@@ -174,37 +194,44 @@
 
                 if (!response.ok) throw new Error("Error en la descarga");
 
+                // ÉXITO: Completar barra y descargar
                 clearInterval(timer);
                 pBar.style.width = '100%';
-                pBar.innerText = '100%';
-                statusText.innerText = "¡Listo! Descarga iniciada.";
+                statusText.innerText = "¡Listo! Tu descarga comenzará ahora.";
+                statusText.style.color = '#00f260';
 
+                // Crear blob y descargar
                 const blob = await response.blob();
                 const downloadUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = downloadUrl;
                 
+                // Obtener nombre del archivo desde el header de Python
                 const headerName = response.headers.get('x-filename');
-                a.download = headerName ? headerName : "audio.mp3";
+                a.download = headerName ? headerName : "audio_descargado.mp3";
                 
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-
+                
+                // Restaurar botón después de 3 segundos
                 setTimeout(() => {
                     btn.disabled = false;
-                    btn.innerText = "CONVERTIR Y DESCARGAR";
-                    statusText.innerText = "Descarga completada.";
+                    btn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> DESCARGAR MP3';
                     document.getElementById('urlInput').value = "";
-                }, 3000);
+                    pContainer.style.display = 'none';
+                    statusText.innerText = "";
+                }, 4000);
 
             } catch (error) {
                 clearInterval(timer);
-                pBar.style.background = '#ff4d4d';
-                pBar.innerText = 'Error';
-                statusText.innerText = "Ocurrió un error. Revisa el enlace.";
+                pBar.style.width = '100%';
+                pBar.style.background = '#ff4b2b'; // Rojo error
+                statusText.innerText = "❌ Ocurrió un error. Verifica el enlace.";
+                statusText.style.color = '#ff4b2b';
+                
                 btn.disabled = false;
-                btn.innerText = "INTENTAR DE NUEVO";
+                btn.innerHTML = 'INTENTAR DE NUEVO';
             }
         }
     </script>
