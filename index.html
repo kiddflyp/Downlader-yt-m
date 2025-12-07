@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor YouTube a MP3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1c1c1c 0%, #2a2a2a 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        .card {
+            background: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        h2 { margin-bottom: 20px; font-weight: 300; }
+        .logo { color: #ff0000; font-size: 3rem; margin-bottom: 10px; }
+        
+        .input-group { position: relative; margin-bottom: 15px; }
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #555;
+            background: #444;
+            color: white;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus { border-color: #ff0000; }
+        .input-icon { position: absolute; left: 15px; top: 18px; color: #aaa; }
+
+        /* Estilo para el selector de calidad */
+        select {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 25px;
+            background: #444;
+            color: white;
+            border: 2px solid #555;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            cursor: pointer;
+        }
+        select:focus { border-color: #ff0000; }
+
+        button {
+            background: linear-gradient(45deg, #ff0000, #ff4d4d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #555; cursor: not-allowed; }
+
+        .progress-container {
+            margin-top: 25px;
+            background-color: #222;
+            border-radius: 10px;
+            height: 25px;
+            width: 100%;
+            display: none;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar {
+            background: #00e676;
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: black;
+            font-weight: bold;
+        }
+        .status-text { margin-top: 10px; font-size: 14px; color: #ccc; min-height: 20px;}
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <i class="fab fa-youtube logo"></i>
+        <h2>MP3 Downloader</h2>
+        
+        <div class="input-group">
+            <i class="fas fa-link input-icon"></i>
+            <input type="text" id="urlInput" placeholder="Pega el link de YouTube aquí..." autocomplete="off">
+        </div>
+
+        <select id="qualitySelect">
+            <option value="128">Calidad Normal (128 kbps)</option>
+            <option value="192" selected>Calidad Alta (192 kbps)</option>
+            <option value="320">Calidad Máxima (320 kbps)</option>
+        </select>
+        
+        <button id="btnDownload" onclick="iniciarDescarga()">CONVERTIR Y DESCARGAR</button>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+        <p class="status-text" id="statusText"></p>
+    </div>
+
+    <script>
+        async function iniciarDescarga() {
+            const url = document.getElementById('urlInput').value;
+            // Obtenemos la calidad seleccionada
+            const quality = document.getElementById('qualitySelect').value;
+            
+            const btn = document.getElementById('btnDownload');
+            const pContainer = document.getElementById('progressContainer');
+            const pBar = document.getElementById('progressBar');
+            const statusText = document.getElementById('statusText');
+
+            if (!url) {
+                alert("Por favor ingresa una URL");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Procesando...";
+            pContainer.style.display = 'block';
+            pBar.style.width = '0%';
+            pBar.innerText = '0%';
+            statusText.innerText = "Conectando con el servidor...";
+
+            let width = 0;
+            const timer = setInterval(() => {
+                if (width >= 85) {
+                    clearInterval(timer);
+                } else {
+                    width++; 
+                    pBar.style.width = width + '%';
+                    pBar.innerText = width + '%';
+                    if(width > 20) statusText.innerText = `Descargando en ${quality} kbps...`;
+                    if(width > 60) statusText.innerText = "Convirtiendo formato...";
+                }
+            }, 100);
+
+            try {
+                const formData = new FormData();
+                formData.append('url', url);
+                // Enviamos también la calidad
+                formData.append('quality', quality);
+
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Error en la descarga");
+
+                clearInterval(timer);
+                pBar.style.width = '100%';
+                pBar.innerText = '100%';
+                statusText.innerText = "¡Listo! Descarga iniciada.";
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                
+                const headerName = response.headers.get('x-filename');
+                a.download = headerName ? headerName : "audio.mp3";
+                
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerText = "CONVERTIR Y DESCARGAR";
+                    statusText.innerText = "Descarga completada.";
+                    document.getElementById('urlInput').value = "";
+                }, 3000);
+
+            } catch (error) {
+                clearInterval(timer);
+                pBar.style.background = '#ff4d4d';
+                pBar.innerText = 'Error';
+                statusText.innerText = "Ocurrió un error. Revisa el enlace.";
+                btn.disabled = false;
+                btn.innerText = "INTENTAR DE NUEVO";
+            }
+        }
+    </script>
+</body>
+</html>
