@@ -5,9 +5,10 @@ import platform
 
 app = Flask(__name__)
 
-# Definir rutas
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'downloads')
+# Definimos dónde buscar el archivo de cookies
+COOKIES_FILE = os.path.join(BASE_DIR, 'cookies.txt')
 
 if not os.path.exists(DOWNLOAD_FOLDER):
     os.makedirs(DOWNLOAD_FOLDER)
@@ -25,18 +26,13 @@ def download_video():
         return "Error: URL no válida", 400
 
     try:
-        # DETECCIÓN AUTOMÁTICA DE SISTEMA OPERATIVO
-        # Windows (Tu PC): Usa los .exe que pegaste en la carpeta.
-        # Linux (Nube): Busca el ffmpeg que descargó el script build.sh en la carpeta base.
-        if platform.system() == 'Windows':
-            ffmpeg_loc = BASE_DIR
-        else:
-            ffmpeg_loc = BASE_DIR # En Render también lo dejamos en la base con el script
-
+        # Configuración para usar cookies
         ydl_opts = {
             'format': 'bestaudio/best',
             'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
-            'ffmpeg_location': ffmpeg_loc, 
+            'ffmpeg_location': BASE_DIR if platform.system() == 'Windows' else None,
+            # ESTA LÍNEA ES LA CLAVE PARA SALTAR EL BLOQUEO:
+            'cookiefile': COOKIES_FILE, 
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -66,7 +62,7 @@ def download_video():
 
     except Exception as e:
         print(f"Error: {e}")
-        return f"Error del servidor: {str(e)}", 500
+        return f"Error de YouTube (Bloqueo anti-bot): {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
